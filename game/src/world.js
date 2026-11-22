@@ -211,7 +211,7 @@ export const ROOMS = [
         ],
       },
       {
-        name: 'KOVAC', color: '#2b2b2b', initial: 'K',
+        name: 'KOVAC', color: '#565664', initial: 'K',
         waypoints: [
           { x: 220, y: 180 }, { x: 220, y: 540 }, { x: 360, y: 540 }, { x: 360, y: 180 },
         ],

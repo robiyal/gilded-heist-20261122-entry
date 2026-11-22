@@ -113,6 +113,9 @@ function drawGuardList(ctx, game) {
     ctx.beginPath();
     ctx.arc(x + 8, y, 8, 0, Math.PI * 2);
     ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
     ctx.fillStyle = '#fff';
     ctx.font = 'bold 10px Georgia, serif';
     ctx.textAlign = 'center';

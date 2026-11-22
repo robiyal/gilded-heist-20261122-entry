@@ -383,9 +383,14 @@ function drawCones(ctx, game, time) {
       : hot > 0.35
         ? 'rgba(242,169,59,' + (0.18 + hot * 0.16) + ')'
         : 'rgba(242,201,76,0.20)';
+    const edge = g.state === 'chase' ? 'rgba(229,72,77,0.55)' : 'rgba(242,201,76,0.38)';
     ctx.fillStyle = col;
     conePath(ctx, g.x, g.y, g.angle, TUNING.guardVisionRange, TUNING.guardVisionHalfAngle);
     ctx.fill();
+    // Thin edge so the cone boundary still reads at thumbnail size.
+    ctx.strokeStyle = edge;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
   }
   // Camera cones: cool cyan sweep; amber flash while warning, red while spotted.
   for (const c of game.cameras) {
@@ -494,6 +499,10 @@ function drawNamePill(ctx, x, y, initial, name, color, state) {
   ctx.beginPath();
   ctx.arc(x - w / 2 + 15, y + 12, 11, 0, Math.PI * 2);
   ctx.fill();
+  // Thin light rim so the chip pops off any floor at thumbnail size.
+  ctx.strokeStyle = 'rgba(255,255,255,0.55)';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
   ctx.fillStyle = '#fff';
   ctx.font = 'bold 14px Georgia, serif';
   ctx.textAlign = 'center';
@@ -503,10 +512,17 @@ function drawNamePill(ctx, x, y, initial, name, color, state) {
   ctx.textAlign = 'left';
   ctx.fillText(name, x - w / 2 + 30, y + 17);
   if (state !== 'PATROL') {
-    ctx.fillStyle = state === 'CHASE' ? '#e5484d' : '#f2a93b';
+    // State text gets the same dark backing pill as the camera labels:
+    // bare amber on light marble (room 1) was nearly unreadable.
     ctx.font = 'bold 10px Georgia, serif';
+    const sw = ctx.measureText(state).width + 16;
+    ctx.fillStyle = 'rgba(10,14,18,0.85)';
+    ctx.beginPath();
+    ctx.roundRect(x - sw / 2, y + 28, sw, 18, 9);
+    ctx.fill();
+    ctx.fillStyle = state === 'CHASE' ? '#ff6b6f' : '#f2c94c';
     ctx.textAlign = 'center';
-    ctx.fillText(state, x, y + 36);
+    ctx.fillText(state, x, y + 41);
   }
 }
 
