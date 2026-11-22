@@ -213,7 +213,7 @@ function render(time) {
   if (game.mode === 'title') drawTitle(ctx, game, time);
   else if (game.mode === 'caught') { drawHUD(ctx, game, time); drawCaught(ctx, game); }
   else if (game.mode === 'roomclear') { drawHUD(ctx, game, time); drawRoomClear(ctx, game); }
-  else if (game.mode === 'getaway') drawGetaway(ctx, game);
+  else if (game.mode === 'getaway') drawGetaway(ctx, game, time);
   else if (game.mode === 'paused') { drawHUD(ctx, game, time); drawPaused(ctx); }
   else drawHUD(ctx, game, time);
 }

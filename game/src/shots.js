@@ -43,6 +43,12 @@ function stageAction(game) {
   // Cameras mid-sweep, cones crossing the runner.
   game.cameras[0].angle = 1.1;
   game.cameras[1].angle = -1.9;
+  // Mid-stride poses: the thief is caught mid-step, the patrols mid-walk.
+  game.thief.moving = true;
+  game.thief.walkPhase = 1.4;
+  game.guards[0].walkPhase = 1.3;
+  game.guards[1].walkPhase = 2.6;
+  game.guards[2].walkPhase = 4.1;
   game.prompt = 'E — GRAB RUBY CROWN';
 }
 
@@ -71,6 +77,11 @@ function stageSpotted(game) {
   g0.lastSeen = { x: game.thief.x, y: game.thief.y };
   const g1 = game.guards[1];
   g1.x = 940; g1.y = 420; g1.angle = Math.PI; g1.suspicion = 60; g1.state = 'suspicious';
+  // MARCO runs mid-stride, the thief flees mid-stride.
+  game.thief.moving = true;
+  game.thief.walkPhase = 2.3;
+  game.guards[0].walkPhase = 1.1;
+  game.guards[1].walkPhase = 2.9;
   game.prompt = 'BREAK LINE OF SIGHT!';
 }
 
@@ -101,6 +112,10 @@ function stageHidden(game) {
   g1.x = 300; g1.y = 300; g1.angle = 1.8; g1.suspicion = 0; g1.state = 'patrol';
   const g2 = game.guards[2];
   g2.x = 980; g2.y = 380; g2.angle = 2.6; g2.suspicion = 0; g2.state = 'patrol';
+  // The search party walks slow, mid-step; the thief is still, hidden.
+  game.guards[0].walkPhase = 0.6;
+  game.guards[1].walkPhase = 3.0;
+  game.guards[2].walkPhase = 1.8;
   game.prompt = 'HIDDEN — CONES CANNOT SEE YOU';
 }
 

@@ -1,6 +1,6 @@
 // GILDED — the HUD and the screens: alarm meter, loot, coins, tool buttons,
 // the guard list with uniform swatches, and title / caught / getaway screens.
-import { PALETTE, VIEW_W, VIEW_H, WALL } from './config.js';
+import { PALETTE, VIEW_W, VIEW_H, WALL, mulberry32 } from './config.js';
 import { TOOL_DEFS } from './tools.js';
 import { alarmColor, alarmLabel } from './alarm.js';
 import { guardStateLabel } from './guards.js';
@@ -239,8 +239,26 @@ export function drawRoomClear(ctx, game) {
   drawStats(ctx, game, 380);
 }
 
-export function drawGetaway(ctx, game) {
+export function drawGetaway(ctx, game, time) {
   dim(ctx);
+  // A warm gold glow behind the title + drifting sparkles: the payoff
+  // screen should feel like a celebration, not a dark overlay.
+  const glow = ctx.createRadialGradient(VIEW_W / 2, 180, 10, VIEW_W / 2, 180, 340);
+  glow.addColorStop(0, 'rgba(242,201,76,0.16)');
+  glow.addColorStop(1, 'rgba(242,201,76,0)');
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+  const rng = mulberry32(99);
+  for (let i = 0; i < 16; i += 1) {
+    const sx = 200 + rng() * 880;
+    const sy = 120 + rng() * 480;
+    const sr = 1 + rng() * 1.8;
+    const sa = 0.25 + 0.45 * (0.5 + 0.5 * Math.sin(time * 2 + i * 1.7));
+    ctx.fillStyle = 'rgba(242,201,76,' + sa.toFixed(2) + ')';
+    ctx.beginPath();
+    ctx.arc(sx, sy, sr, 0, Math.PI * 2);
+    ctx.fill();
+  }
   ctx.textAlign = 'center';
   ctx.fillStyle = PALETTE.goldBright;
   ctx.font = 'bold 64px Georgia, serif';
@@ -289,10 +307,21 @@ function drawRouteMap(ctx, game) {
   for (let i = 0; i < 3; i++) {
     const x = x0 + i * (bw + 15);
     const done = i < game.roomIndex + 1;
-    ctx.fillStyle = done ? 'rgba(20,80,61,0.9)' : 'rgba(26,32,39,0.9)';
-    ctx.beginPath();
-    ctx.roundRect(x, y0, bw, bh, 10);
-    ctx.fill();
+    if (done) {
+      ctx.save();
+      ctx.shadowColor = PALETTE.goldBright;
+      ctx.shadowBlur = 18;
+      ctx.fillStyle = 'rgba(20,80,61,0.9)';
+      ctx.beginPath();
+      ctx.roundRect(x, y0, bw, bh, 10);
+      ctx.fill();
+      ctx.restore();
+    } else {
+      ctx.fillStyle = 'rgba(26,32,39,0.9)';
+      ctx.beginPath();
+      ctx.roundRect(x, y0, bw, bh, 10);
+      ctx.fill();
+    }
     ctx.strokeStyle = done ? PALETTE.goldBright : '#5a6673';
     ctx.lineWidth = 2;
     ctx.stroke();

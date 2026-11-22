@@ -40,6 +40,8 @@ export const ROOMS = [
       R(520, 96, 240, 10, 'rope'),
       R(120, 620, 60, 60, 'plant'),
       R(1100, 620, 60, 60, 'plant'),
+      // Grandfather clock against the east wall (decoration: no collision).
+      R(1192, 200, 36, 90, 'clock'),
     ],
     hideZones: [
       { x: 120, y: 300, w: 100, h: 100, label: 'BEHIND THE STATUE' },
@@ -59,14 +61,14 @@ export const ROOMS = [
     ],
     guards: [
       {
-        name: 'MARCO', color: '#1f2a5e', initial: 'M',
+        name: 'MARCO', color: '#1f2a5e', initial: 'M', hat: 'peaked', scale: 1.08, build: 1.05,
         waypoints: [
           { x: 420, y: 300 }, { x: 640, y: 300 }, { x: 860, y: 300 },
           { x: 860, y: 470 }, { x: 640, y: 470 }, { x: 420, y: 470 },
         ],
       },
       {
-        name: 'LENA', color: '#1e5e52', initial: 'L',
+        name: 'LENA', color: '#1e5e52', initial: 'L', hat: 'bun', scale: 0.97, build: 0.92,
         waypoints: [
           { x: 1080, y: 140 }, { x: 1080, y: 580 }, { x: 960, y: 580 }, { x: 960, y: 140 },
         ],
@@ -110,6 +112,8 @@ export const ROOMS = [
       R(700, 80, 150, 40, 'bench'),
       R(180, 620, 60, 60, 'plant'),
       R(1040, 100, 60, 60, 'plant'),
+      // Chandelier over the gallery (decoration: hangs from the ceiling).
+      R(632, 87, 56, 56, 'chandelier'),
     ],
     hideZones: [
       { x: 130, y: 100, w: 100, h: 100, label: 'BEHIND THE STATUE' },
@@ -128,20 +132,20 @@ export const ROOMS = [
     ],
     guards: [
       {
-        name: 'OTTO', color: '#6e2440', initial: 'O',
+        name: 'OTTO', color: '#6e2440', initial: 'O', hat: 'peaked', scale: 1.06, build: 1.0,
         waypoints: [
           { x: 400, y: 260 }, { x: 640, y: 260 }, { x: 880, y: 260 },
           { x: 880, y: 460 }, { x: 640, y: 460 }, { x: 400, y: 460 },
         ],
       },
       {
-        name: 'SANA', color: '#5e5a17', initial: 'S',
+        name: 'SANA', color: '#5e5a17', initial: 'S', hat: 'bun', scale: 0.94, build: 0.9,
         waypoints: [
           { x: 200, y: 200 }, { x: 200, y: 520 }, { x: 340, y: 520 }, { x: 340, y: 200 },
         ],
       },
       {
-        name: 'IVAN', color: '#3a4552', initial: 'I',
+        name: 'IVAN', color: '#3a4552', initial: 'I', hat: 'flat', scale: 1.05, build: 1.1,
         waypoints: [
           { x: 1080, y: 220 }, { x: 1080, y: 500 }, { x: 960, y: 500 }, { x: 960, y: 220 },
         ],
@@ -153,6 +157,8 @@ export const ROOMS = [
     ],
     lamps: [
       { x: 323, y: 173 }, { x: 957, y: 173 }, { x: 323, y: 547 }, { x: 957, y: 547 },
+      // The chandelier's own pool, top-centre of the gallery.
+      { x: 660, y: 115 },
     ],
     ropeGate: { x: 430, y: 600, w: 150, h: 10, label: 'ROPE BARRIER — LOCKPICK TO OPEN' },
     needLoot: 1,
@@ -185,6 +191,8 @@ export const ROOMS = [
       R(200, 90, 200, 10, 'rope'),
       R(880, 620, 200, 10, 'rope'),
       R(1100, 620, 60, 60, 'plant'),
+      // Brass safe-dial medallion on the north wall (decoration).
+      R(756, 48, 48, 48, 'dial'),
     ],
     hideZones: [
       { x: 120, y: 530, w: 100, h: 100, label: 'BEHIND THE STATUE' },
@@ -204,20 +212,20 @@ export const ROOMS = [
     ],
     guards: [
       {
-        name: 'PETRA', color: '#4a235a', initial: 'P',
+        name: 'PETRA', color: '#4a235a', initial: 'P', hat: 'bun', scale: 1.0, build: 1.0,
         waypoints: [
           { x: 430, y: 280 }, { x: 640, y: 280 }, { x: 850, y: 280 },
           { x: 850, y: 450 }, { x: 640, y: 450 }, { x: 430, y: 450 },
         ],
       },
       {
-        name: 'KOVAC', color: '#565664', initial: 'K',
+        name: 'KOVAC', color: '#565664', initial: 'K', hat: 'campaign', scale: 1.12, build: 1.15,
         waypoints: [
           { x: 220, y: 180 }, { x: 220, y: 540 }, { x: 360, y: 540 }, { x: 360, y: 180 },
         ],
       },
       {
-        name: 'MIRA', color: '#1d4a2c', initial: 'M',
+        name: 'MIRA', color: '#1d4a2c', initial: 'M', hat: 'flat', scale: 0.95, build: 0.92,
         waypoints: [
           { x: 1060, y: 200 }, { x: 1060, y: 520 }, { x: 920, y: 520 }, { x: 920, y: 200 },
         ],
@@ -297,8 +305,9 @@ export function losBlockedBySmoke(smoke, x1, y1, x2, y2) {
 }
 
 export function solidRects(room) {
-  // Everything that stops the thief: walls + all cover except plants.
-  return room.walls.concat(room.cover.filter((c) => c.kind !== 'plant'));
+  // Everything that stops the thief: walls + all cover except plants and
+  // ceiling/wall decoration (chandelier, clock, dial hang clear of the floor).
+  return room.walls.concat(room.cover.filter((c) => c.kind !== 'plant' && c.kind !== 'chandelier' && c.kind !== 'clock' && c.kind !== 'dial'));
 }
 
 // Push a circle out of a rect; returns the corrected position.
