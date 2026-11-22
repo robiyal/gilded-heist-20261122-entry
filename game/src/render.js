@@ -108,9 +108,9 @@ function drawSteel(ctx, time) {
   ctx.fillStyle = PALETTE.steel;
   ctx.fillRect(0, 0, VIEW_W, VIEW_H);
   // Brushed steel: long horizontal streaks.
-  ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+  ctx.strokeStyle = 'rgba(255,255,255,0.06)';
   ctx.lineWidth = 1;
-  for (let i = 0; i < 60; i++) {
+  for (let i = 0; i < 100; i++) {
     const y = (i * 47.7) % VIEW_H;
     const x = (i * 211) % 400;
     ctx.beginPath();
@@ -118,11 +118,25 @@ function drawSteel(ctx, time) {
     ctx.lineTo(x + 500 + (i % 5) * 90, y);
     ctx.stroke();
   }
+  // Steel plate seams: faint panels so the floor reads at thumbnail size.
+  ctx.strokeStyle = 'rgba(255,255,255,0.045)';
+  for (let x = 200; x < VIEW_W; x += 200) {
+    ctx.beginPath();
+    ctx.moveTo(x, WALL);
+    ctx.lineTo(x, VIEW_H - WALL);
+    ctx.stroke();
+  }
+  for (let y = 180; y < VIEW_H; y += 180) {
+    ctx.beginPath();
+    ctx.moveTo(WALL, y);
+    ctx.lineTo(VIEW_W - WALL, y);
+    ctx.stroke();
+  }
   // Green accent stripes guiding the eye to the vault door.
-  ctx.fillStyle = 'rgba(55,201,120,0.28)';
+  ctx.fillStyle = 'rgba(55,201,120,0.36)';
   ctx.fillRect(0, 120, VIEW_W, 6);
   ctx.fillRect(0, 594, VIEW_W, 6);
-  ctx.fillStyle = 'rgba(55,201,120,0.16)';
+  ctx.fillStyle = 'rgba(55,201,120,0.22)';
   for (let x = 80; x < VIEW_W; x += 160) {
     ctx.fillRect(x, 300, 60, 4);
     ctx.fillRect(x, 416, 60, 4);
@@ -232,21 +246,25 @@ function drawCase(ctx, c, game, time) {
   ctx.lineWidth = 2;
   ctx.strokeRect(c.x, c.y, c.w, c.h - 14);
   // The artifact glints inside — or an empty case once taken.
+  // In the dark vault the glint is bigger and hotter so the loot reads
+  // at thumbnail size.
   if (loot && !loot.taken) {
     const cx = c.x + c.w / 2;
     const cy = c.y + (c.h - 14) / 2;
     const pulse = 0.6 + 0.3 * Math.sin(time * 2.4 + c.x);
+    const steel = game.room.floor === 'steel';
+    const glintR = steel ? 12 : 9;
     ctx.save();
     ctx.shadowColor = PALETTE.goldBright;
-    ctx.shadowBlur = 16 * pulse;
+    ctx.shadowBlur = (steel ? 26 : 16) * pulse;
     ctx.fillStyle = PALETTE.goldBright;
     ctx.beginPath();
-    ctx.arc(cx, cy, 9, 0, Math.PI * 2);
+    ctx.arc(cx, cy, glintR, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
     ctx.fillStyle = '#fff8dc';
     ctx.beginPath();
-    ctx.arc(cx - 3, cy - 3, 3, 0, Math.PI * 2);
+    ctx.arc(cx - 3, cy - 3, steel ? 4 : 3, 0, Math.PI * 2);
     ctx.fill();
   } else if (loot && loot.taken) {
     ctx.fillStyle = 'rgba(244,239,226,0.5)';
@@ -462,30 +480,33 @@ function drawMark(ctx, x, y, ch, color) {
 }
 
 function drawNamePill(ctx, x, y, initial, name, color, state) {
-  ctx.font = 'bold 11px Georgia, serif';
+  // Bigger pill + bolder text than v1: at 1280px the names must still read
+  // when the shot is shrunk to ~300px. The coloured initial chip still
+  // carries identity; the name itself now reads too.
+  ctx.font = 'bold 13px Georgia, serif';
   const nameW = ctx.measureText(name).width;
-  const w = 26 + nameW + 8;
+  const w = 30 + nameW + 10;
   ctx.fillStyle = 'rgba(10,14,18,0.85)';
   ctx.beginPath();
-  ctx.roundRect(x - w / 2, y, w, 20, 10);
+  ctx.roundRect(x - w / 2, y, w, 24, 12);
   ctx.fill();
   ctx.fillStyle = color;
   ctx.beginPath();
-  ctx.arc(x - w / 2 + 13, y + 10, 9, 0, Math.PI * 2);
+  ctx.arc(x - w / 2 + 15, y + 12, 11, 0, Math.PI * 2);
   ctx.fill();
   ctx.fillStyle = '#fff';
-  ctx.font = 'bold 12px Georgia, serif';
+  ctx.font = 'bold 14px Georgia, serif';
   ctx.textAlign = 'center';
-  ctx.fillText(initial, x - w / 2 + 13, y + 14);
+  ctx.fillText(initial, x - w / 2 + 15, y + 17);
   ctx.fillStyle = '#f4efe2';
-  ctx.font = 'bold 11px Georgia, serif';
+  ctx.font = 'bold 13px Georgia, serif';
   ctx.textAlign = 'left';
-  ctx.fillText(name, x - w / 2 + 26, y + 14);
+  ctx.fillText(name, x - w / 2 + 30, y + 17);
   if (state !== 'PATROL') {
     ctx.fillStyle = state === 'CHASE' ? '#e5484d' : '#f2a93b';
-    ctx.font = 'bold 9px Georgia, serif';
+    ctx.font = 'bold 10px Georgia, serif';
     ctx.textAlign = 'center';
-    ctx.fillText(state, x, y + 30);
+    ctx.fillText(state, x, y + 36);
   }
 }
 
@@ -623,15 +644,20 @@ function drawCameras(ctx, game, time) {
 
 function drawLightPools(ctx, room, game) {
   // Warm pools under every lamp, composited additively over the floor.
+  // The steel vault is the darkest room, so its pools are wider and
+  // stronger; marble and carpet keep the original size.
+  const steel = room.floor === 'steel';
+  const poolR = steel ? 150 : 110;
+  const poolA = steel ? 0.26 : 0.20;
   ctx.save();
   ctx.globalCompositeOperation = 'lighter';
   for (const lamp of room.lamps) {
-    const g = ctx.createRadialGradient(lamp.x, lamp.y, 6, lamp.x, lamp.y, 110);
-    g.addColorStop(0, 'rgba(255,214,120,0.20)');
+    const g = ctx.createRadialGradient(lamp.x, lamp.y, 6, lamp.x, lamp.y, poolR);
+    g.addColorStop(0, 'rgba(255,214,120,' + poolA + ')');
     g.addColorStop(1, 'rgba(255,214,120,0)');
     ctx.fillStyle = g;
     ctx.beginPath();
-    ctx.arc(lamp.x, lamp.y, 110, 0, Math.PI * 2);
+    ctx.arc(lamp.x, lamp.y, poolR, 0, Math.PI * 2);
     ctx.fill();
   }
   ctx.restore();

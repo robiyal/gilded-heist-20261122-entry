@@ -83,8 +83,12 @@ game.loadRoom = function (index) {
   game.lootTakenThisRoom = 0;
   game.ropeOpen = false;
   game.roomClearT = 0;
+  // The exit label carries its own article when it has one ('THE VAULT'),
+  // so add 'the' only when the label does not already start with it.
+  const dest = game.room.exit.label;
+  const destText = dest.startsWith('THE ') ? dest : 'the ' + dest;
   game.objective = 'Lift ' + game.room.needLoot + ' artifact' + (game.room.needLoot > 1 ? 's' : '') +
-    ', then reach the ' + game.room.exit.label + '.';
+    ', then reach ' + destText + '.';
   game.roomEntryLoot = game.lootStolen.slice();
   game.roomEntryCoins = game.coins;
   game.prompt = '';

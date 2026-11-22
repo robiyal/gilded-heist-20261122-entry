@@ -229,6 +229,8 @@ export const ROOMS = [
     ],
     lamps: [
       { x: 364, y: 184 }, { x: 916, y: 184 }, { x: 364, y: 536 }, { x: 916, y: 536 },
+      // Mid-band pools: the vault's middle lane was the darkest stretch.
+      { x: 200, y: 360 }, { x: 640, y: 360 }, { x: 1080, y: 360 },
     ],
     ropeGate: { x: 200, y: 90, w: 200, h: 10, label: 'ROPE BARRIER — LOCKPICK TO OPEN' },
     needLoot: 1,
